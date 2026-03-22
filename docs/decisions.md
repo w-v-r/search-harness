@@ -50,9 +50,9 @@ This document captures key architectural decisions baked into v0 and their ratio
 
 ## 5. SDK Shape Influences Architecture
 
-**Decision:** The SDK API surface (SearchClient -> Index -> search/continue_search) drives the internal architecture. The client owns indexes directly — there is no intermediate "App" grouping layer.
+**Decision:** The SDK API surface (SearchClient -> Index -> search/continue_search) drives the internal architecture.
 
-**Rationale:** The developer experience is the product. The internal architecture should serve the API, not the other way around. Index-centric design with orchestrator ownership makes the API feel minimal and typed while keeping the orchestration logic centralized. Every comparable search/vector DB SDK (Pinecone, Weaviate, Qdrant, Typesense, Elasticsearch, Meilisearch, Algolia) uses a two-level Client -> Index/Collection pattern. An intermediate App layer adds a concept without earning its keep — shared defaults belong on the client, and index grouping is handled by naming conventions.
+**Rationale:** The developer experience is the product. The internal architecture should serve the API, not the other way around. Index-centric design with orchestrator ownership makes the API feel minimal and typed while keeping the orchestration logic centralized. Every comparable search/vector DB SDK (Pinecone, Weaviate, Qdrant, Typesense, Elasticsearch, Meilisearch, Algolia) uses a two-level Client -> Index/Collection pattern. Shared defaults belong on the client, and index grouping is handled by naming conventions.
 
 ## 6. Traces are Not Optional
 
