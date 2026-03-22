@@ -66,7 +66,33 @@ This document captures key architectural decisions baked into v0 and their ratio
 
 **Rationale:** Pydantic provides runtime validation, serialization, and strong typing. It aligns with modern Python SDK conventions and makes the API self-documenting. Using a single modeling approach across the entire codebase reduces cognitive load.
 
-## 8. HITL Returns Structure, Not UI
+## 8. Query Types Are Developer-Defined, Not System-Defined
+
+**Decision:** There is no system-level `QueryType` enum. Query types are plain strings declared per-index by the developer via `expected_query_types`.
+
+**Rationale:** The harness brings the classification structure (the mechanism for understanding queries). The developer brings the vocabulary (what kinds of queries their users actually make). A fixed taxonomy like `entity_lookup` / `document_lookup` assumes the developer's domain. A recipe search app, a legal document system, and a company CRM have fundamentally different query patterns. Hardcoding those patterns into a system enum forces every consumer to map their domain into our vocabulary, which is the opposite of the SDK's design philosophy.
+
+Developer-defined query types also open a natural path to multi-index routing: when a `SearchClient` owns multiple indexes, query type classification can match incoming queries to the index(es) that declared they handle that type.
+
+**Implication:** The harness ships with *suggested* query type strings in documentation (e.g., `"entity_lookup"`, `"document_lookup"`) as conventions, but never enforces them. Classification prompts are built dynamically from the index's declared `expected_query_types`.
+
+## 9. IndexConfig is the Public Surface, SearchPolicy is the Escape Hatch
+
+**Decision:** `IndexConfig` contains only identity, fields, and developer vocabulary. Orchestration policy (iteration budgets, confidence thresholds, canonical filter values, example queries) lives in a separate `SearchPolicy` object, referenced via an optional `policy` field on `IndexConfig`. Every `SearchPolicy` field has real types and a real v0 use case -- untyped placeholder knobs (`ambiguity_rules`, `stop_conditions`, `extraction_hints`) were cut to keep the surface minimal and honest.
+
+**Rationale:** The SDK should feel minimal. A developer creating an index should think about *what their index contains and what kinds of queries it handles* -- not about how the planner scores confidence or when the evaluator stops iterating. Mixing identity with policy turns `IndexConfig` into a framework configuration blob that requires understanding orchestration internals to use. Separating policy means most developers never see it, while power users get a clean escape hatch with opinionated defaults they can override selectively. Keeping only typed, implemented fields prevents the "configurable but does nothing" trap.
+
+**Implication:** `SearchPolicy` ships with strong defaults (`max_iterations=2`, `max_branches=2`, `confidence.stop=0.7`, etc.). The orchestration layer reads policy from `index_config.policy`. Per-call overrides may be supported in the future but are not required for v0. Additional policy knobs can be added when there is real behavior behind them.
+
+## 10. Public SDK Contracts vs Internal Orchestration Models
+
+**Decision:** Models are split into two explicit layers: **public SDK contracts** (Pydantic `BaseModel`) and **internal orchestration models** (plain `@dataclass`). The boundary is structural -- it exists in the document, in the code layout, and in the naming conventions.
+
+**Rationale:** When public contracts and internal state are blended, every internal refactor risks becoming a contract change. Planner output (`SearchPlan`, `PlannedBranch`), evaluator state (`NextAction`), and pipeline context (`SearchContext`) are implementation details that need to evolve freely. The developer never sees these types. Making them dataclasses instead of Pydantic models signals instability by design and prevents them from leaking into the SDK surface. Internal enums (`PlanAction`, `EvaluatorAction`) follow the same principle -- they describe harness behavior but are not part of the developer-facing contract.
+
+**Implication:** Adding a field to an internal model is a refactor. Adding a field to a public model is a contract change. This distinction should be enforced in code review and package structure.
+
+## 11. HITL Returns Structure, Not UI
 
 **Decision:** The HITL follow-up response returns a structured schema (JSON Schema-like), not rendered UI.
 

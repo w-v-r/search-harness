@@ -16,16 +16,12 @@ When AITL runs multiple branches, how results are merged (interleaved, ranked, d
 
 ## 4. Query Classification Taxonomy
 
-The set of query types (entity_lookup, document_lookup, catalog_lookup, etc.) is not closed. v0 will ship with a small taxonomy that covers the hero use cases; it should be extensible.
+Query types are developer-defined strings, not a system enum (see decisions.md #8). The harness classifies queries against the index's `expected_query_types` vocabulary. The open question is how much structure to provide around classification: should the harness suggest conventions, ship example taxonomies, or leave it entirely to the developer?
 
-## 5. Search Profiles as Code vs Config
-
-Whether search profiles (expected intents, ambiguity rules, default filters) are defined in Python code or in a configuration file/format is an open decision. v0 will use code-defined profiles.
-
-## 6. Dynamic Follow-Up Schema Approach
+## 5. Dynamic Follow-Up Schema Approach
 
 Whether dynamic follow-up schemas use a library like dydantic directly or a custom schema builder abstraction is not decided. v0 will experiment and pick the simpler path.
 
-## 7. Backend Query DSL Translation Model
+## 6. Backend Query DSL Translation Model
 
 The exact model for translating a generic search plan into backend-native query DSL (Typesense multi_search, Elasticsearch query DSL, SQL) is underspecified. The adapter protocol defines the boundary, but the internal translation strategy may evolve.

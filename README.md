@@ -73,7 +73,7 @@ companies = client.indexes.create(
     searchable_fields=["company_name", "aliases", "description"],
     filterable_fields=["country", "industry", "status"],
     display_fields=["company_name", "country", "status"],
-    profiles=["entity_lookup"],
+    expected_query_types=["entity_lookup", "name_search"],
 )
 
 result = companies.search("show me Telstra stuff")
@@ -92,11 +92,11 @@ When the harness detects material ambiguity, it returns a structured envelope --
 ```json
 {
   "status": "needs_input",
-  "reason": "underspecified_query",
-  "message": "I found multiple possible interpretations of your query.",
   "original_query": "show me Telstra stuff",
-  "requested_input": {
-    "schema": {
+  "follow_up": {
+    "reason": "underspecified_query",
+    "message": "I found multiple possible interpretations of your query.",
+    "input_schema": {
       "type": "object",
       "properties": {
         "entity_type": {"type": "string", "enum": ["company", "documents", "tickets"]},
@@ -104,12 +104,12 @@ When the harness detects material ambiguity, it returns a structured envelope --
         "time_range": {"type": "string"}
       },
       "required": ["entity_type"]
-    }
+    },
+    "candidates": [
+      {"label": "Telstra company records", "confidence": 0.62},
+      {"label": "Telstra-related documents", "confidence": 0.31}
+    ]
   },
-  "candidates": [
-    {"label": "Telstra company records", "confidence": 0.62},
-    {"label": "Telstra-related documents", "confidence": 0.31}
-  ],
   "trace_id": "abc-123"
 }
 ```
