@@ -22,20 +22,41 @@ This SDK treats search as a **decision process under uncertainty**:
 
 The differentiator is not the retrieval and not the LLM -- it is the **iterated search** that navigates uncertainty, asks for clarification when it matters, and never silently discards the user's original intent.
 
+### Search Principles
+
+1. **The original query is always preserved.** Autonomous reformulations are additive, not substitutive. If the harness runs a modified query, it appears as an additional branch -- never a replacement.
+2. **Ambiguity is surfaced, not hidden.** When uncertainty is material, the harness tells the developer what it found and what is missing, rather than guessing silently.
+3. **AITL is bounded and observable.** Every autonomous step is traced. The harness does not run open-ended loops or make unbounded decisions.
+4. **Traces are a product feature, not infrastructure.** Teams will not trust LLM-in-the-loop search unless they can inspect what happened. Every decision step -- classification, extraction, planning, execution, evaluation -- is captured and available to the developer.
+
 ### Interaction Modes
 
 **HITL (Human in the Loop)** -- When ambiguity is material, the system returns a structured follow-up request (`needs_input`) with a schema the application can render however it wants. The search service returns structure, not UI.
 
-**AITL (AI in the Loop)** -- The system takes a small, bounded number of additional search actions autonomously: add filters from extracted structure, branch once, merge results. Max 2-3 iterations, max 2 branches, original query path always preserved.
+**AITL (AI in the Loop)** -- Controlled navigation under uncertainty. The harness takes a small, bounded number of additional search actions: add filters from extracted structure, branch once, merge results. Max 2-3 iterations, max 2 branches, original query path always preserved. AITL is cautious by design -- it acts when it can reduce uncertainty, not when it can merely do more.
+
+## Designed For
+
+### Company / Entity Search
+
+Queries like *"show me Telstra stuff"*, *"find Apple in Australia"*, *"show me all entities related to Acme."* The problems: ambiguous entity names, underspecified target type, missing disambiguating filters, noisy results from broad search.
+
+### Document + Metadata Search
+
+Queries like *"show me contracts for Telstra from last year"*, *"find onboarding docs for enterprise customers."* The problems: users mix content terms with metadata constraints, applications know the metadata structure but users do not, search should extract structure and turn it into filters.
+
+These two use cases anchor v0 and prevent the product from drifting into generic LLM middleware.
 
 ## Target Users
 
 - SaaS teams building user-facing app search
 - Internal app developers searching structured business data
 
-The product is optimized for **human-computer interaction around search**, not just retrieval quality in isolation.
+Optimized for **human-computer interaction around search** -- making structured data feel searchable and trustworthy -- not retrieval quality in isolation.
 
 ## Quick Start
+
+The harness is an orchestrator that owns indexes, not a thin wrapper around a backend. You create a client, register an app (which groups related indexes and defaults), then define indexes with their schema, adapter, and the kinds of queries you expect. The harness uses that configuration to shape classification, follow-ups, and search planning.
 
 ```python
 from search_service import SearchClient, TypesenseAdapter
@@ -65,6 +86,37 @@ if result.status == "needs_input":
     )
 ```
 
+### What `needs_input` looks like
+
+When the harness detects material ambiguity, it returns a structured envelope -- not a boolean and hidden magic:
+
+```json
+{
+  "status": "needs_input",
+  "reason": "underspecified_query",
+  "message": "I found multiple possible interpretations of your query.",
+  "original_query": "show me Telstra stuff",
+  "requested_input": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "entity_type": {"type": "string", "enum": ["company", "documents", "tickets"]},
+        "region": {"type": "string"},
+        "time_range": {"type": "string"}
+      },
+      "required": ["entity_type"]
+    }
+  },
+  "candidates": [
+    {"label": "Telstra company records", "confidence": 0.62},
+    {"label": "Telstra-related documents", "confidence": 0.31}
+  ],
+  "trace_id": "abc-123"
+}
+```
+
+The application owns how this is rendered -- dropdowns, forms, confirmation dialogs. The harness returns structure, not UI.
+
 ## v0 Scope
 
 ### In scope
@@ -93,13 +145,13 @@ if result.status == "needs_input":
 
 ## Architecture
 
-The system is layered so that the orchestration logic (where the product value lives) is independent from the underlying search backend:
+The system is layered so that the orchestration logic (where the product value lives) is independent from the underlying search backend. The backend adapter is swappable by design -- Typesense is the first real adapter, but it is not the identity of the product. The in-memory adapter ships for development and testing.
 
-1. **SDK Layer** -- Developer-facing Python API (client, index, search, continue_search, trace)
+1. **SDK Layer** -- Developer-facing Python API (client, app, index, search, continue_search, trace)
 2. **Orchestration Layer** -- Ambiguity detection, query understanding, search planning, iteration control, follow-up generation, stopping decisions
-3. **Adapter Layer** -- Backend abstraction (Typesense, in-memory, future adapters)
+3. **Adapter Layer** -- Backend abstraction (in-memory, Typesense, future adapters). All backend communication goes through the adapter protocol.
 4. **Model Layer** -- LLM providers for classification, extraction, and planning decisions
-5. **Trace / Telemetry Layer** -- Step-level observability capturing every decision in the search process
+5. **Trace / Telemetry Layer** -- Step-level observability capturing every decision in the search process. Traces are first-class output, not just logging.
 
 ## Development
 
