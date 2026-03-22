@@ -56,16 +56,15 @@ Optimized for **human-computer interaction around search** -- making structured 
 
 ## Quick Start
 
-The harness is an orchestrator that owns indexes, not a thin wrapper around a backend. You create a client, register an app (which groups related indexes and defaults), then define indexes with their schema, adapter, and the kinds of queries you expect. The harness uses that configuration to shape classification, follow-ups, and search planning.
+The harness is an orchestrator that owns indexes, not a thin wrapper around a backend. You create a client, define indexes with their schema, adapter, and the kinds of queries you expect. The harness uses that configuration to shape classification, follow-ups, and search planning.
 
 ```python
 from search_service import SearchClient, TypesenseAdapter
 from my_models import CompanySchema
 
 client = SearchClient(model="mercury-2", debug=True)
-app = client.app("customer-search")
 
-companies = app.indexes.create(
+companies = client.indexes.create(
     name="companies",
     schema=CompanySchema,
     adapter=TypesenseAdapter(host="localhost", port=8108, api_key="xyz"),
@@ -147,7 +146,7 @@ The application owns how this is rendered -- dropdowns, forms, confirmation dial
 
 The system is layered so that the orchestration logic (where the product value lives) is independent from the underlying search backend. The backend adapter is swappable by design -- Typesense is the first real adapter, but it is not the identity of the product. The in-memory adapter ships for development and testing.
 
-1. **SDK Layer** -- Developer-facing Python API (client, app, index, search, continue_search, trace)
+1. **SDK Layer** -- Developer-facing Python API (client, index, search, continue_search, trace)
 2. **Orchestration Layer** -- Ambiguity detection, query understanding, search planning, iteration control, follow-up generation, stopping decisions
 3. **Adapter Layer** -- Backend abstraction (in-memory, Typesense, future adapters). All backend communication goes through the adapter protocol.
 4. **Model Layer** -- LLM providers for classification, extraction, and planning decisions

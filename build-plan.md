@@ -264,22 +264,12 @@ Top-level entry point.
 client = SearchClient(api_key="...", model="mercury-2")
 ```
 
-### 9.2 Search App / Search Service
+### 9.2 Search Index
 
-A broader orchestrator object that owns one or more indexes and global defaults.
-
-```python
-app = client.app(name="customer-search")
-```
-
-### 9.3 Search Index
-
-Represents a search target and its retrieval configuration.
-
-This should be a first-class object, but conceptually it lives inside the orchestrator.
+Represents a search target and its retrieval configuration. The client owns indexes directly — there is no intermediate grouping layer.
 
 ```python
-index = app.indexes.create(
+index = client.indexes.create(
     name="companies",
     schema=CompanySchema,
     adapter=TypesenseAdapter(...),
@@ -288,7 +278,7 @@ index = app.indexes.create(
 )
 ```
 
-### 9.4 Search Profile
+### 9.3 Search Profile
 
 Optional named config bundle for expected query patterns.
 
@@ -307,7 +297,7 @@ A profile defines:
 * max iterations
 * follow-up style
 
-### 9.5 Search Result Envelope
+### 9.4 Search Result Envelope
 
 Every search call should return a structured envelope, not raw backend output.
 
@@ -320,9 +310,7 @@ Every search call should return a structured envelope, not raw backend output.
 ```python
 client = SearchClient(model="mercury-2")
 
-app = client.app("crm-search")
-
-index = app.indexes.create(
+index = client.indexes.create(
     name="companies",
     schema=CompanySchema,
     adapter=TypesenseAdapter(...),
@@ -425,7 +413,7 @@ The developer should define an index in terms of search behavior, not just backe
 ### Example
 
 ```python
-index = app.indexes.create(
+index = client.indexes.create(
     name="companies",
     schema=CompanySchema,
     adapter=TypesenseAdapter(...),
@@ -685,7 +673,6 @@ This should make the product easy to debug and trust.
 ```text
 search_service/
   client.py
-  app.py
   indexes/
     base.py
     config.py
@@ -893,14 +880,11 @@ These defaults should be opinionated.
 
 * model provider
 * default model
-* telemetry hooks
-* debug mode
-
-### App config
-
 * default interaction mode
 * trace retention settings
 * global prompt policy
+* telemetry hooks
+* debug mode
 
 ### Index config
 
@@ -946,9 +930,8 @@ from search_service import SearchClient, TypesenseAdapter
 from my_models import CompanySchema
 
 client = SearchClient(model="mercury-2", debug=True)
-app = client.app("customer-search")
 
-companies = app.indexes.create(
+companies = client.indexes.create(
     name="companies",
     schema=CompanySchema,
     adapter=TypesenseAdapter(
@@ -1023,7 +1006,7 @@ These should remain configurable rather than prematurely fixed.
 ## 28. Recommended First Build Order for the Coding Agent
 
 1. Create the package skeleton and core Pydantic models.
-2. Implement `SearchClient`, `App`, and `Index` objects.
+2. Implement `SearchClient` and `Index` objects.
 3. Implement the in-memory adapter.
 4. Implement the result envelope and trace model.
 5. Implement direct search with keyword + filters, no LLM.

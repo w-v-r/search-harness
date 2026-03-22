@@ -12,7 +12,6 @@ graph TD
     ROOT --> CONFIG["Config Files"]
 
     PKG --> CLIENT["client.py"]
-    PKG --> APP["app.py"]
     PKG --> EXCEPTIONS["exceptions.py"]
     PKG --> INDEXES["indexes/"]
     PKG --> ADAPTERS["adapters/"]

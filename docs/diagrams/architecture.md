@@ -4,7 +4,6 @@
 flowchart TB
     subgraph SDK["SDK Layer"]
         SC["SearchClient"]
-        APP["App"]
         IDX["SearchIndex"]
     end
 
@@ -39,8 +38,7 @@ flowchart TB
         ENVELOPE["SearchResultEnvelope\nstatus · results · branches · original_query · trace_id"]
     end
 
-    SC --> APP
-    APP --> IDX
+    SC --> IDX
 
     IDX -->|"search(query)"| ANALYZER
     ANALYZER -.->|uses| LLM
