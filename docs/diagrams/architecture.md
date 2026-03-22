@@ -1,4 +1,4 @@
-# Architecture -- Runtime Data Flow
+# Architecture — Runtime Data Flow
 
 ```mermaid
 flowchart TB
@@ -8,13 +8,15 @@ flowchart TB
         IDX["SearchIndex"]
     end
 
-    subgraph ORCH["Orchestration Layer"]
-        ANALYZER["QueryAnalyzer"]
-        CLASSIFIER["Classifier"]
-        EXTRACTOR["Extractor"]
-        PLANNER["SearchPlanner"]
-        EXECUTOR["Executor"]
-        EVALUATOR["ResultEvaluator"]
+    subgraph ORCH["Orchestration — The Harness"]
+        ANALYZER["QueryAnalyzer\nclassify · extract · detect ambiguity"]
+
+        subgraph LOOP["Iteration Loop · max 2-3 steps · max 2 branches · original query preserved"]
+            PLANNER["SearchPlanner"]
+            EXECUTOR["Executor"]
+            EVALUATOR["ResultEvaluator"]
+        end
+
         FOLLOWUP["FollowUpGenerator"]
     end
 
@@ -34,33 +36,27 @@ flowchart TB
     end
 
     subgraph RESULT["Result"]
-        ENVELOPE["SearchResultEnvelope"]
+        ENVELOPE["SearchResultEnvelope\nstatus · results · branches · original_query · trace_id"]
     end
 
     SC --> APP
     APP --> IDX
 
     IDX -->|"search(query)"| ANALYZER
-    ANALYZER --> CLASSIFIER
-    ANALYZER --> EXTRACTOR
-    CLASSIFIER -.->|uses| LLM
-    EXTRACTOR -.->|uses| LLM
+    ANALYZER -.->|uses| LLM
+    ANALYZER -->|"QueryAnalysis + original query"| PLANNER
 
-    ANALYZER -->|QueryAnalysis| PLANNER
-    PLANNER -.->|uses| LLM
     PLANNER -->|SearchPlan| EXECUTOR
-
+    PLANNER -.->|uses| LLM
     EXECUTOR -->|BackendSearchRequest| PROTOCOL
     PROTOCOL --> INMEM
     PROTOCOL --> TS
-
-    EXECUTOR -->|raw results| EVALUATOR
+    EXECUTOR -->|"results + context"| EVALUATOR
     EVALUATOR -.->|uses| LLM
 
+    EVALUATOR -->|"iterate: apply filters / branch / reformulate"| PLANNER
     EVALUATOR -->|"completed"| ENVELOPE
     EVALUATOR -->|"needs_input"| FOLLOWUP
-    EVALUATOR -->|"retry/branch"| PLANNER
-
     FOLLOWUP --> ENVELOPE
 
     ANALYZER -.->|step| TRACER
@@ -71,13 +67,34 @@ flowchart TB
     TRACER -.->|trace_id| ENVELOPE
 ```
 
-## Data Flow Summary
+## How the Harness Works
 
-1. **Developer calls** `index.search("show me Telstra stuff")`
-2. **SDK Layer** routes the request to the orchestration pipeline
-3. **QueryAnalyzer** classifies the query and extracts entities/filters using the Model Layer
-4. **SearchPlanner** decides the action: direct search, search+filters, multi-branch, or needs_clarification
-5. **Executor** translates the plan into a backend request via the Adapter Protocol
-6. **ResultEvaluator** assesses the results and decides: completed, needs_input, or retry
-7. **Tracer** captures each step for observability
-8. **SearchResultEnvelope** is returned with status, results, branches, and trace_id
+The harness treats search as an **iterated decision process**, not a single-pass pipeline. Query analysis feeds the first iteration, and then the system loops — bounded and observable — until it has a good answer or exhausts its budget.
+
+### The iteration loop is the core mechanism
+
+1. **SearchPlanner** decides the next action: direct search, search with filters, branch, or escalate
+2. **Executor** translates the plan into a backend request via the adapter protocol
+3. **ResultEvaluator** assesses results and makes the stopping decision: completed, needs_input, or iterate
+
+The loop runs at most 2-3 iterations with at most 2 branches. The original query is preserved through every iteration — reformulations are additive (new branches), never substitutive.
+
+### Query analysis feeds the loop
+
+**QueryAnalyzer** runs once at the start. It classifies the query, extracts entities, detects ambiguity, and proposes filters. Its output — a `QueryAnalysis` plus the preserved original query — is the input to the first planning step. The analyzer is a component serving the loop, not the identity of the system.
+
+### Two modes govern the evaluator's response to uncertainty
+
+The **interaction mode** (HITL or AITL) determines what happens when the evaluator encounters ambiguity or weak results:
+
+| Situation | HITL | AITL |
+|---|---|---|
+| Ambiguity detected | Return `needs_input` immediately | Try to resolve within budget, escalate if it can't |
+| Weak results | Return results with low confidence | Try filter augmentation or branching |
+| Budget exhausted | N/A | Return best available results |
+
+In HITL mode, the loop typically runs once — analyze, search, evaluate, return. In AITL mode, the evaluator may send control back to the planner for additional bounded steps.
+
+### Every step is traced
+
+The tracer captures each decision point: what the analyzer found, what the planner chose, what the executor ran, what the evaluator decided and why. Traces are a product feature — they ship in the `SearchResultEnvelope` alongside results.

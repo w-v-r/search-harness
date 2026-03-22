@@ -8,6 +8,7 @@ graph TD
     ROOT --> DOCS["docs/"]
     ROOT --> TESTS["tests/"]
     ROOT --> EXAMPLES["examples/"]
+    ROOT --> BUILDPLAN["build-plan.md"]
     ROOT --> CONFIG["Config Files"]
 
     PKG --> CLIENT["client.py"]
@@ -47,6 +48,7 @@ graph TD
     TELEMETRY --> TEL_TRACER["tracer.py"]
     TELEMETRY --> TEL_EVENTS["events.py"]
 
+    DOCS --> AITL["aitl.md"]
     DOCS --> ROADMAP["roadmap.md"]
     DOCS --> DECISIONS["decisions.md"]
     DOCS --> OPENQ["open-questions.md"]
