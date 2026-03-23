@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from typing import Any
 
+from search_service.indexes.runtime import execute_search
 from search_service.schemas.config import IndexConfig
 from search_service.schemas.enums import InteractionMode
 from search_service.schemas.result import SearchResultEnvelope
+from search_service.telemetry.tracer import Tracer
 
 
 class SearchIndex:
@@ -14,8 +16,9 @@ class SearchIndex:
     configuration and provides the search API surface.
     """
 
-    def __init__(self, config: IndexConfig) -> None:
+    def __init__(self, config: IndexConfig, tracer: Tracer) -> None:
         self._config = config
+        self._tracer = tracer
 
     @property
     def config(self) -> IndexConfig:
@@ -25,11 +28,16 @@ class SearchIndex:
     def name(self) -> str:
         return self._config.name
 
+    @property
+    def tracer(self) -> Tracer:
+        return self._tracer
+
     def search(
         self,
         query: str,
         *,
         interaction_mode: InteractionMode | None = None,
+        filters: dict[str, Any] | None = None,
     ) -> SearchResultEnvelope:
         """Execute a search query against this index.
 
@@ -37,14 +45,17 @@ class SearchIndex:
             query: The user's search query string.
             interaction_mode: Override the index's default interaction mode
                 for this search. If None, uses the index's default.
+            filters: Optional pre-specified filters to apply.
 
         Returns:
             SearchResultEnvelope with status, results, and trace.
         """
-        raise NotImplementedError(
-            "Search pipeline not yet wired. "
-            "The orchestration layer (analyzer -> planner -> executor -> evaluator) "
-            "will be connected in a subsequent step."
+        return execute_search(
+            query,
+            self._config,
+            self._tracer,
+            interaction_mode=interaction_mode,
+            filters=filters,
         )
 
     def continue_search(

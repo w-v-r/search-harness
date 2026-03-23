@@ -3,6 +3,7 @@ from __future__ import annotations
 from search_service.exceptions import IndexAlreadyExistsError, IndexNotFoundError
 from search_service.indexes.base import SearchIndex
 from search_service.schemas.config import IndexConfig
+from search_service.telemetry.tracer import Tracer
 
 
 class IndexManager:
@@ -12,8 +13,9 @@ class IndexManager:
     operations for SearchIndex instances.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, tracer: Tracer) -> None:
         self._store: dict[str, SearchIndex] = {}
+        self._tracer = tracer
 
     def create(self, config: IndexConfig) -> SearchIndex:
         """Create a new search index from the given configuration.
@@ -31,7 +33,7 @@ class IndexManager:
         if config.name in self._store:
             raise IndexAlreadyExistsError(config.name)
 
-        index = SearchIndex(config)
+        index = SearchIndex(config, self._tracer)
         self._store[config.name] = index
         return index
 
@@ -93,12 +95,18 @@ class SearchClient:
     """
 
     def __init__(self) -> None:
-        self._indexes = IndexManager()
+        self._tracer = Tracer()
+        self._indexes = IndexManager(self._tracer)
 
     @property
     def indexes(self) -> IndexManager:
         """Access the index manager for creating, retrieving, and managing indexes."""
         return self._indexes
+
+    @property
+    def tracer(self) -> Tracer:
+        """Access the shared tracer for retrieving search traces."""
+        return self._tracer
 
     def __repr__(self) -> str:
         return f"SearchClient(indexes={len(self._indexes)})"
