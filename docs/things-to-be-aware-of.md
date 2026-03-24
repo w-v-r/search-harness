@@ -44,4 +44,20 @@
 
 - **SDK wiring:** `MercuryModelProvider` is passed into **`QueryAnalyzer`**; **`SearchClient`** does not yet assemble a Mercury-backed analyzer automatically—that remains a separate product/UX decision.
 
+- **Prompts vs transport:** Classification and extraction **system prompts**, **user prompt builders**, and **JSON parsing** (`classification_from_parsed`, `extraction_from_parsed`, `_parse_json_object`, etc.) live in **`mercury.py`** next to the Inception **`OpenAI`** client. That is fine for v0. If you add **other `ModelProvider` implementations** (e.g. OpenAI, Anthropic), you will likely want to **lift shared prompt text and parsing** into a **model-agnostic module** and keep each provider thin (**auth, base URL, request/response quirks**). Until then, duplicating or forking prompts across files is a maintenance risk.
+
 - **Static typing:** Full-package **`mypy`** may still report issues unrelated to Mercury (e.g. **`schemas/config.py`**). Fix those for strict CI when you tighten typing.
+
+### Typesense adapter (`adapters/typesense.py`)
+
+- **`SearchAdapter` vs `multi_search`:** The protocol only requires **`search`**. **`TypesenseAdapter.multi_search`** is an optional batch helper (one HTTP call for several `BackendSearchRequest`s). The orchestrator still calls **`search` once per branch** unless you change it to use multi-search explicitly.
+
+- **Filters:** Dict conditions must use **only** **`$gt` / `$gte` / `$lt` / `$lte` / `$ne`**. Unknown keys or an **empty operator dict** **`{}`** raise **`ValueError`** instead of degrading to “no filter” (which would widen results silently). **`InMemoryAdapter`** does not validate operator keys the same way—unknown keys there are effectively ignored in the operator loop, so **strict backend parity** for malformed operator dicts is not guaranteed; prefer validated filters from extraction/policy.
+
+- **Empty `query_by`:** If **`searchable_fields`** and **`BackendSearchRequest.fields`** are both empty, **`build_search_parameters`** raises **`ValueError`**. Normal **`IndexConfig`** validation requires non-empty **`searchable_fields`**.
+
+- **Schema mapping:** **`collection_schema_from_index_config`** infers Typesense fields from a Pydantic **`document_schema`** with heuristics (unions except optional, nested models, etc. are simplified). Complex documents may need **hand-authored** collection schemas or follow-up mapping work.
+
+- **`create_collection_if_missing`:** Uses **`name in client.collections`**, which on the real client can imply a **network round-trip**. Use at **startup/migrations**, not per search.
+
+- **Production confidence:** Unit tests **mock** the Typesense client. First integration with a real server should sanity-check **`filter_by`**, pagination, and schema **create** behavior for your document shapes.

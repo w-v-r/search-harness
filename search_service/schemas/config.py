@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import cast
+
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from search_service.adapters.base import SearchAdapter
@@ -135,7 +137,8 @@ class IndexConfig(BaseModel):
         if not _is_pydantic_model(self.document_schema):
             return self
 
-        schema_fields = set(self.document_schema.model_fields.keys())  # type: ignore[union-attr]
+        schema_cls = cast(type[BaseModel], self.document_schema)
+        schema_fields = set(schema_cls.model_fields.keys())
 
         if self.id_field not in schema_fields:
             raise ValueError(f"id_field '{self.id_field}' not found in schema fields: {schema_fields}")
