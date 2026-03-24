@@ -1,0 +1,714 @@
+{
+  "company_aitl_completed": {
+    "branches": [
+      {
+        "confidence": 0.9,
+        "filters": {},
+        "kind": "original_query",
+        "query": "Telstra Australia",
+        "results": [
+          {
+            "id": "1",
+            "matched_fields": [],
+            "metadata": {
+              "country": "AU",
+              "industry": "telecommunications",
+              "name": "Telstra Australia",
+              "status": "active"
+            },
+            "score": null,
+            "snippet": null,
+            "source": "companies",
+            "title": "Telstra Australia"
+          }
+        ],
+        "total_backend_hits": 1
+      },
+      {
+        "confidence": 0.9,
+        "filters": {
+          "country": "AU"
+        },
+        "kind": "filter_augmented",
+        "query": "Telstra Australia",
+        "results": [
+          {
+            "id": "1",
+            "matched_fields": [],
+            "metadata": {
+              "country": "AU",
+              "industry": "telecommunications",
+              "name": "Telstra Australia",
+              "status": "active"
+            },
+            "score": null,
+            "snippet": null,
+            "source": "companies",
+            "title": "Telstra Australia"
+          }
+        ],
+        "total_backend_hits": 1
+      }
+    ],
+    "follow_up": null,
+    "interaction_mode": "aitl",
+    "message": "Search completed with 2 result(s) (1 iteration(s), 2 branch(es))",
+    "original_query": "Telstra Australia",
+    "query_analysis": {
+      "ambiguity": "none",
+      "extracted_entities": [],
+      "filters": {
+        "country": "AU"
+      },
+      "missing_fields": [],
+      "possible_resource_types": [],
+      "primary_subject": "Telstra Australia",
+      "query_type": "entity_lookup",
+      "raw_query": "Telstra Australia",
+      "target_resource_type": "company"
+    },
+    "results": [
+      {
+        "id": "1",
+        "matched_fields": [],
+        "metadata": {
+          "country": "AU",
+          "industry": "telecommunications",
+          "name": "Telstra Australia",
+          "status": "active"
+        },
+        "score": null,
+        "snippet": null,
+        "source": "companies",
+        "title": "Telstra Australia"
+      }
+    ],
+    "status": "completed"
+  },
+  "company_hitl_continue": {
+    "branches": [
+      {
+        "confidence": 0.82,
+        "filters": {},
+        "kind": "original_query",
+        "query": "Telstra",
+        "results": [
+          {
+            "id": "1",
+            "matched_fields": [],
+            "metadata": {
+              "country": "AU",
+              "industry": "telecommunications",
+              "name": "Telstra Australia",
+              "status": "active"
+            },
+            "score": null,
+            "snippet": null,
+            "source": "companies",
+            "title": "Telstra Australia"
+          },
+          {
+            "id": "2",
+            "matched_fields": [],
+            "metadata": {
+              "country": "US",
+              "industry": "telecommunications",
+              "name": "Telstra USA",
+              "status": "active"
+            },
+            "score": null,
+            "snippet": null,
+            "source": "companies",
+            "title": "Telstra USA"
+          }
+        ],
+        "total_backend_hits": 2
+      },
+      {
+        "confidence": 0.82,
+        "filters": {
+          "country": "AU"
+        },
+        "kind": "filter_augmented",
+        "query": "Telstra",
+        "results": [
+          {
+            "id": "1",
+            "matched_fields": [],
+            "metadata": {
+              "country": "AU",
+              "industry": "telecommunications",
+              "name": "Telstra Australia",
+              "status": "active"
+            },
+            "score": null,
+            "snippet": null,
+            "source": "companies",
+            "title": "Telstra Australia"
+          }
+        ],
+        "total_backend_hits": 1
+      }
+    ],
+    "follow_up": null,
+    "interaction_mode": "hitl",
+    "message": "Search completed with 3 result(s) (1 iteration(s), 2 branch(es))",
+    "original_query": "Telstra",
+    "query_analysis": {
+      "ambiguity": "low",
+      "extracted_entities": [],
+      "filters": {},
+      "missing_fields": [
+        "country"
+      ],
+      "possible_resource_types": [],
+      "primary_subject": "Telstra",
+      "query_type": "entity_lookup",
+      "raw_query": "Telstra",
+      "target_resource_type": "company"
+    },
+    "results": [
+      {
+        "id": "1",
+        "matched_fields": [],
+        "metadata": {
+          "country": "AU",
+          "industry": "telecommunications",
+          "name": "Telstra Australia",
+          "status": "active"
+        },
+        "score": null,
+        "snippet": null,
+        "source": "companies",
+        "title": "Telstra Australia"
+      },
+      {
+        "id": "2",
+        "matched_fields": [],
+        "metadata": {
+          "country": "US",
+          "industry": "telecommunications",
+          "name": "Telstra USA",
+          "status": "active"
+        },
+        "score": null,
+        "snippet": null,
+        "source": "companies",
+        "title": "Telstra USA"
+      }
+    ],
+    "status": "completed"
+  },
+  "company_hitl_needs_input": {
+    "branches": [],
+    "follow_up": {
+      "candidates": [],
+      "input_schema": {
+        "additionalProperties": true,
+        "properties": {
+          "country": {
+            "enum": [
+              "AU",
+              "US"
+            ],
+            "type": "string"
+          },
+          "industry": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "inactive"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "country"
+        ],
+        "type": "object"
+      },
+      "message": "The query needs clarification. Please provide values for: country.",
+      "reason": "ambiguous_entity"
+    },
+    "interaction_mode": "hitl",
+    "message": "Additional information needed to refine search results",
+    "original_query": "Telstra",
+    "query_analysis": {
+      "ambiguity": "high",
+      "extracted_entities": [],
+      "filters": {},
+      "missing_fields": [
+        "country"
+      ],
+      "possible_resource_types": [],
+      "primary_subject": "Telstra",
+      "query_type": "entity_lookup",
+      "raw_query": "Telstra",
+      "target_resource_type": "company"
+    },
+    "results": [],
+    "status": "needs_input"
+  },
+  "document_aitl_completed": {
+    "branches": [
+      {
+        "confidence": 0.9,
+        "filters": {},
+        "kind": "original_query",
+        "query": "enterprise onboarding",
+        "results": [
+          {
+            "id": "d3",
+            "matched_fields": [],
+            "metadata": {
+              "customer_segment": "enterprise",
+              "doc_type": "onboarding",
+              "title": "Enterprise onboarding guide 2024",
+              "year": 2024
+            },
+            "score": null,
+            "snippet": null,
+            "source": "documents",
+            "title": "Enterprise onboarding guide 2024"
+          }
+        ],
+        "total_backend_hits": 1
+      },
+      {
+        "confidence": 0.9,
+        "filters": {
+          "customer_segment": "enterprise",
+          "doc_type": "onboarding",
+          "year": {
+            "$gte": 2024
+          }
+        },
+        "kind": "filter_augmented",
+        "query": "enterprise onboarding",
+        "results": [
+          {
+            "id": "d3",
+            "matched_fields": [],
+            "metadata": {
+              "customer_segment": "enterprise",
+              "doc_type": "onboarding",
+              "title": "Enterprise onboarding guide 2024",
+              "year": 2024
+            },
+            "score": null,
+            "snippet": null,
+            "source": "documents",
+            "title": "Enterprise onboarding guide 2024"
+          }
+        ],
+        "total_backend_hits": 1
+      }
+    ],
+    "follow_up": null,
+    "interaction_mode": "aitl",
+    "message": "Search completed with 2 result(s) (1 iteration(s), 2 branch(es))",
+    "original_query": "enterprise onboarding",
+    "query_analysis": {
+      "ambiguity": "none",
+      "extracted_entities": [],
+      "filters": {
+        "customer_segment": "enterprise",
+        "doc_type": "onboarding",
+        "year": {
+          "$gte": 2024
+        }
+      },
+      "missing_fields": [],
+      "possible_resource_types": [],
+      "primary_subject": "enterprise onboarding",
+      "query_type": "metadata_content",
+      "raw_query": "enterprise onboarding",
+      "target_resource_type": null
+    },
+    "results": [
+      {
+        "id": "d3",
+        "matched_fields": [],
+        "metadata": {
+          "customer_segment": "enterprise",
+          "doc_type": "onboarding",
+          "title": "Enterprise onboarding guide 2024",
+          "year": 2024
+        },
+        "score": null,
+        "snippet": null,
+        "source": "documents",
+        "title": "Enterprise onboarding guide 2024"
+      }
+    ],
+    "status": "completed"
+  },
+  "document_hitl_continue": {
+    "branches": [
+      {
+        "confidence": 0.5,
+        "filters": {},
+        "kind": "original_query",
+        "query": "Telstra contracts",
+        "results": [
+          {
+            "id": "d1",
+            "matched_fields": [],
+            "metadata": {
+              "customer_segment": "enterprise",
+              "doc_type": "contract",
+              "title": "Telstra enterprise contracts 2024",
+              "year": 2024
+            },
+            "score": null,
+            "snippet": null,
+            "source": "documents",
+            "title": "Telstra enterprise contracts 2024"
+          },
+          {
+            "id": "d2",
+            "matched_fields": [],
+            "metadata": {
+              "customer_segment": "smb",
+              "doc_type": "contract",
+              "title": "Telstra SMB contracts 2024",
+              "year": 2024
+            },
+            "score": null,
+            "snippet": null,
+            "source": "documents",
+            "title": "Telstra SMB contracts 2024"
+          }
+        ],
+        "total_backend_hits": 2
+      },
+      {
+        "confidence": 0.5,
+        "filters": {
+          "doc_type": "contract",
+          "year": {
+            "$gte": 2024
+          }
+        },
+        "kind": "filter_augmented",
+        "query": "Telstra contracts",
+        "results": [
+          {
+            "id": "d1",
+            "matched_fields": [],
+            "metadata": {
+              "customer_segment": "enterprise",
+              "doc_type": "contract",
+              "title": "Telstra enterprise contracts 2024",
+              "year": 2024
+            },
+            "score": null,
+            "snippet": null,
+            "source": "documents",
+            "title": "Telstra enterprise contracts 2024"
+          },
+          {
+            "id": "d2",
+            "matched_fields": [],
+            "metadata": {
+              "customer_segment": "smb",
+              "doc_type": "contract",
+              "title": "Telstra SMB contracts 2024",
+              "year": 2024
+            },
+            "score": null,
+            "snippet": null,
+            "source": "documents",
+            "title": "Telstra SMB contracts 2024"
+          }
+        ],
+        "total_backend_hits": 2
+      },
+      {
+        "confidence": 0.82,
+        "filters": {},
+        "kind": "original_query",
+        "query": "Telstra contracts",
+        "results": [
+          {
+            "id": "d1",
+            "matched_fields": [],
+            "metadata": {
+              "customer_segment": "enterprise",
+              "doc_type": "contract",
+              "title": "Telstra enterprise contracts 2024",
+              "year": 2024
+            },
+            "score": null,
+            "snippet": null,
+            "source": "documents",
+            "title": "Telstra enterprise contracts 2024"
+          },
+          {
+            "id": "d2",
+            "matched_fields": [],
+            "metadata": {
+              "customer_segment": "smb",
+              "doc_type": "contract",
+              "title": "Telstra SMB contracts 2024",
+              "year": 2024
+            },
+            "score": null,
+            "snippet": null,
+            "source": "documents",
+            "title": "Telstra SMB contracts 2024"
+          }
+        ],
+        "total_backend_hits": 2
+      },
+      {
+        "confidence": 0.82,
+        "filters": {
+          "customer_segment": "enterprise"
+        },
+        "kind": "filter_augmented",
+        "query": "Telstra contracts",
+        "results": [
+          {
+            "id": "d1",
+            "matched_fields": [],
+            "metadata": {
+              "customer_segment": "enterprise",
+              "doc_type": "contract",
+              "title": "Telstra enterprise contracts 2024",
+              "year": 2024
+            },
+            "score": null,
+            "snippet": null,
+            "source": "documents",
+            "title": "Telstra enterprise contracts 2024"
+          }
+        ],
+        "total_backend_hits": 1
+      }
+    ],
+    "follow_up": null,
+    "interaction_mode": "hitl",
+    "message": "Search completed with 7 result(s) (1 iteration(s), 4 branch(es))",
+    "original_query": "Telstra contracts",
+    "query_analysis": {
+      "ambiguity": "low",
+      "extracted_entities": [],
+      "filters": {
+        "doc_type": "contract",
+        "year": {
+          "$gte": 2024
+        }
+      },
+      "missing_fields": [
+        "customer_segment"
+      ],
+      "possible_resource_types": [],
+      "primary_subject": "Telstra contracts",
+      "query_type": "metadata_content",
+      "raw_query": "Telstra contracts",
+      "target_resource_type": null
+    },
+    "results": [
+      {
+        "id": "d1",
+        "matched_fields": [],
+        "metadata": {
+          "customer_segment": "enterprise",
+          "doc_type": "contract",
+          "title": "Telstra enterprise contracts 2024",
+          "year": 2024
+        },
+        "score": null,
+        "snippet": null,
+        "source": "documents",
+        "title": "Telstra enterprise contracts 2024"
+      },
+      {
+        "id": "d2",
+        "matched_fields": [],
+        "metadata": {
+          "customer_segment": "smb",
+          "doc_type": "contract",
+          "title": "Telstra SMB contracts 2024",
+          "year": 2024
+        },
+        "score": null,
+        "snippet": null,
+        "source": "documents",
+        "title": "Telstra SMB contracts 2024"
+      }
+    ],
+    "status": "completed"
+  },
+  "document_hitl_needs_input": {
+    "branches": [
+      {
+        "confidence": 0.5,
+        "filters": {},
+        "kind": "original_query",
+        "query": "Telstra contracts",
+        "results": [
+          {
+            "id": "d1",
+            "matched_fields": [],
+            "metadata": {
+              "customer_segment": "enterprise",
+              "doc_type": "contract",
+              "title": "Telstra enterprise contracts 2024",
+              "year": 2024
+            },
+            "score": null,
+            "snippet": null,
+            "source": "documents",
+            "title": "Telstra enterprise contracts 2024"
+          },
+          {
+            "id": "d2",
+            "matched_fields": [],
+            "metadata": {
+              "customer_segment": "smb",
+              "doc_type": "contract",
+              "title": "Telstra SMB contracts 2024",
+              "year": 2024
+            },
+            "score": null,
+            "snippet": null,
+            "source": "documents",
+            "title": "Telstra SMB contracts 2024"
+          }
+        ],
+        "total_backend_hits": 2
+      },
+      {
+        "confidence": 0.5,
+        "filters": {
+          "doc_type": "contract",
+          "year": {
+            "$gte": 2024
+          }
+        },
+        "kind": "filter_augmented",
+        "query": "Telstra contracts",
+        "results": [
+          {
+            "id": "d1",
+            "matched_fields": [],
+            "metadata": {
+              "customer_segment": "enterprise",
+              "doc_type": "contract",
+              "title": "Telstra enterprise contracts 2024",
+              "year": 2024
+            },
+            "score": null,
+            "snippet": null,
+            "source": "documents",
+            "title": "Telstra enterprise contracts 2024"
+          },
+          {
+            "id": "d2",
+            "matched_fields": [],
+            "metadata": {
+              "customer_segment": "smb",
+              "doc_type": "contract",
+              "title": "Telstra SMB contracts 2024",
+              "year": 2024
+            },
+            "score": null,
+            "snippet": null,
+            "source": "documents",
+            "title": "Telstra SMB contracts 2024"
+          }
+        ],
+        "total_backend_hits": 2
+      }
+    ],
+    "follow_up": {
+      "candidates": [],
+      "input_schema": {
+        "additionalProperties": true,
+        "properties": {
+          "customer_segment": {
+            "enum": [
+              "enterprise",
+              "smb",
+              "all"
+            ],
+            "type": "string"
+          },
+          "doc_type": {
+            "enum": [
+              "contract",
+              "onboarding",
+              "policy"
+            ],
+            "type": "string"
+          },
+          "year": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "customer_segment"
+        ],
+        "type": "object"
+      },
+      "message": "The search could not proceed with enough confidence. Please narrow your query or provide additional detail.",
+      "reason": "ambiguous_entity"
+    },
+    "interaction_mode": "hitl",
+    "message": "Additional information needed to refine search results",
+    "original_query": "Telstra contracts",
+    "query_analysis": {
+      "ambiguity": "high",
+      "extracted_entities": [],
+      "filters": {
+        "doc_type": "contract",
+        "year": {
+          "$gte": 2024
+        }
+      },
+      "missing_fields": [
+        "customer_segment"
+      ],
+      "possible_resource_types": [],
+      "primary_subject": "Telstra contracts",
+      "query_type": "metadata_content",
+      "raw_query": "Telstra contracts",
+      "target_resource_type": null
+    },
+    "results": [
+      {
+        "id": "d1",
+        "matched_fields": [],
+        "metadata": {
+          "customer_segment": "enterprise",
+          "doc_type": "contract",
+          "title": "Telstra enterprise contracts 2024",
+          "year": 2024
+        },
+        "score": null,
+        "snippet": null,
+        "source": "documents",
+        "title": "Telstra enterprise contracts 2024"
+      },
+      {
+        "id": "d2",
+        "matched_fields": [],
+        "metadata": {
+          "customer_segment": "smb",
+          "doc_type": "contract",
+          "title": "Telstra SMB contracts 2024",
+          "year": 2024
+        },
+        "score": null,
+        "snippet": null,
+        "source": "documents",
+        "title": "Telstra SMB contracts 2024"
+      }
+    ],
+    "status": "needs_input"
+  }
+}

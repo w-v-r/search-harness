@@ -170,12 +170,50 @@ The system is layered so that the orchestration logic (where the product value l
 4. **Model Layer** -- LLM providers for classification, extraction, and planning decisions
 5. **Trace / Telemetry Layer** -- Step-level observability capturing every decision in the search process. Traces are first-class output, not just logging.
 
+## Testing
+
+The repository ships with a layered test suite that covers the public contract from several angles:
+
+- Unit tests for analyzer, planner, evaluator, follow-up generation, and telemetry
+- Adapter tests for both the in-memory adapter and Typesense translation/normalization
+- Golden tests that lock expected envelopes for the company/entity and document/metadata hero flows
+- End-to-end SDK tests for direct search, HITL continuation, AITL branching, and trace behavior
+
+```bash
+uv sync --dev
+uv run pytest
+```
+
+Focused suites:
+
+```bash
+uv run pytest tests/test_golden_flows.py
+uv run pytest tests/test_e2e_flows.py
+uv run pytest tests/test_typesense_adapter.py
+```
+
+Live Mercury provider integration remains optional and is gated behind the `integration` marker:
+
+```bash
+uv run pytest -m integration
+```
+
+More detail on the suite structure and golden fixture workflow lives in `docs/testing.md`.
+
 ## Development
 
 ```bash
-pip install -e ".[dev]"
-pytest
+uv sync --dev
+uv run pytest
 ```
+
+## Documentation Map
+
+- `docs/contracts.md`: public and internal model contracts
+- `docs/decisions.md`: architectural decisions and rationale
+- `docs/aitl.md`: bounded AITL loop design
+- `docs/testing.md`: test layers, commands, and golden fixture workflow
+- `docs/open-questions.md`: intentionally unresolved areas for future iterations
 
 ## License
 
