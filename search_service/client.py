@@ -1,9 +1,15 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+from search_service._internal.context import SearchContext
 from search_service.exceptions import IndexAlreadyExistsError, IndexNotFoundError
 from search_service.indexes.base import SearchIndex
 from search_service.schemas.config import IndexConfig
 from search_service.telemetry.tracer import Tracer
+
+if TYPE_CHECKING:
+    from search_service.orchestration.analyzer import QueryAnalyzer
 
 
 class IndexManager:
@@ -13,16 +19,29 @@ class IndexManager:
     operations for SearchIndex instances.
     """
 
-    def __init__(self, tracer: Tracer) -> None:
+    def __init__(
+        self,
+        tracer: Tracer,
+        *,
+        search_sessions: dict[str, SearchContext],
+    ) -> None:
         self._store: dict[str, SearchIndex] = {}
         self._tracer = tracer
+        self._search_sessions = search_sessions
 
-    def create(self, config: IndexConfig) -> SearchIndex:
+    def create(
+        self,
+        config: IndexConfig,
+        *,
+        analyzer: QueryAnalyzer | None = None,
+    ) -> SearchIndex:
         """Create a new search index from the given configuration.
 
         Args:
             config: IndexConfig defining the index identity, fields,
                 adapter, and optional policy.
+            analyzer: Optional QueryAnalyzer for LLM-powered search.
+                When provided, searches use the orchestrated pipeline.
 
         Returns:
             A configured SearchIndex ready for search calls.
@@ -33,7 +52,12 @@ class IndexManager:
         if config.name in self._store:
             raise IndexAlreadyExistsError(config.name)
 
-        index = SearchIndex(config, self._tracer)
+        index = SearchIndex(
+            config,
+            self._tracer,
+            analyzer=analyzer,
+            sessions=self._search_sessions,
+        )
         self._store[config.name] = index
         return index
 
@@ -96,7 +120,8 @@ class SearchClient:
 
     def __init__(self) -> None:
         self._tracer = Tracer()
-        self._indexes = IndexManager(self._tracer)
+        self._search_sessions: dict[str, SearchContext] = {}
+        self._indexes = IndexManager(self._tracer, search_sessions=self._search_sessions)
 
     @property
     def indexes(self) -> IndexManager:
