@@ -56,33 +56,51 @@ Optimized for **human-computer interaction around search** -- making structured 
 
 ## Quick Start
 
-The harness is an orchestrator that owns indexes, not a thin wrapper around a backend. You create a client, define indexes with their schema, adapter, and the kinds of queries you expect. The harness uses that configuration to shape classification, follow-ups, and search planning.
+The harness is an orchestrator that owns indexes, not a thin wrapper around a backend. You create a client, pass an `IndexConfig` (schema, adapter, fields, query vocabulary), and optionally a `QueryAnalyzer` backed by a `ModelProvider`. The harness uses that configuration to shape classification, follow-ups, and search planning.
 
 ```python
-from search_service import SearchClient, TypesenseAdapter
-from my_models import CompanySchema
+from pydantic import BaseModel
 
-client = SearchClient(model="mercury-2", debug=True)
+from search_service import IndexConfig, InMemoryAdapter, QueryAnalyzer, SearchClient
 
-companies = client.indexes.create(
-    name="companies",
-    schema=CompanySchema,
-    adapter=TypesenseAdapter(host="localhost", port=8108, api_key="xyz"),
-    search_backend="keyword_filters",
-    default_interaction_mode="hitl",
-    searchable_fields=["company_name", "aliases", "description"],
-    filterable_fields=["country", "industry", "status"],
-    display_fields=["company_name", "country", "status"],
-    expected_query_types=["entity_lookup", "name_search"],
+class Company(BaseModel):
+    id: str
+    name: str
+    country: str
+
+client = SearchClient()
+adapter = InMemoryAdapter(
+    documents=[{"id": "1", "name": "Telstra Corporation", "country": "AU"}],
+    searchable_fields=["name"],
 )
+config = IndexConfig(
+    name="companies",
+    document_schema=Company,
+    adapter=adapter,
+    searchable_fields=["name"],
+    filterable_fields=["country"],
+    id_field="id",
+)
+index = client.indexes.create(config)
 
-result = companies.search("show me Telstra stuff")
+result = index.search("Telstra")
+```
 
-if result.status == "needs_input":
-    result = companies.continue_search(
-        trace_id=result.trace_id,
-        user_input={"entity_type": "company", "country": "AU"},
-    )
+With a `QueryAnalyzer`, searches use the full orchestrated pipeline (`needs_input` / `continue_search` when the model reports ambiguity). See `examples/company_search.py` for HITL and AITL demos using a scripted provider (no API keys).
+
+## Examples
+
+Runnable scripts under `examples/` use the **in-memory adapter** and small deterministic model stubs so you can explore behavior without Typesense or Mercury:
+
+| Script | What it shows |
+|--------|----------------|
+| `examples/company_search.py` | Entity search: HITL (`needs_input` then `continue_search`) and AITL (extracted filters + branch history). |
+| `examples/document_search.py` | Document + metadata: underspecified queries, structured follow-up, and AITL with content + filter extraction. |
+
+```bash
+pip install -e .
+python examples/company_search.py
+python examples/document_search.py
 ```
 
 ### What `needs_input` looks like
