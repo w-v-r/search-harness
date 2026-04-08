@@ -1,4 +1,4 @@
-# Search Service v0
+# Search Thingy (The Search Harness)
 
 Simple retrieval disappoints. Queries are underspecified, ambiguous, or both -- and single-shot search just shrugs and returns whatever it finds.
 
@@ -162,7 +162,7 @@ The application owns how this is rendered -- dropdowns, forms, confirmation dial
 
 ## Architecture
 
-The system is layered so that the orchestration logic (where the product value lives) is independent from the underlying search backend. The backend adapter is swappable by design -- Typesense is the first real adapter, but it is not the identity of the product. The in-memory adapter ships for development and testing.
+The system is layered so that the orchestration logic (where the product value lives) is independent from the underlying search backend. The backend adapter is swappable by design -- Typesense and ChromaDB ship as first-class adapters, but they are not the identity of the product. The in-memory adapter ships for development and testing.
 
 1. **SDK Layer** -- Developer-facing Python API (client, index, search, continue_search, trace)
 2. **Orchestration Layer** -- Ambiguity detection, query understanding, search planning, iteration control, follow-up generation, stopping decisions
